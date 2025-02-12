@@ -7,7 +7,7 @@ const puppeteer = require("puppeteer");
 
 const api = express();
 const HOST = "localhost";
-const PORT = 8888;
+const PORT = process.env.PORT;
 api.use(bodyParser.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
