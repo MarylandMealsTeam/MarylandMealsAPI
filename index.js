@@ -6,7 +6,7 @@ const axios = require("axios");
 const puppeteer = require("puppeteer");
 
 const api = express();
-const HOST = "localhost";
+const HOST = "0.0.0.0";
 const PORT = process.env.PORT;
 api.use(bodyParser.json());
 
