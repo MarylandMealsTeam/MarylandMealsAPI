@@ -40,7 +40,7 @@ app.use("/user", user);
 app.use("/ai", ai);
 app.use("/session", usersession);
 
-//change host to 0.0.0.0 when deploying
-app.listen({ port: process.env.EXPO_PUBLIC_PORT, host: "localhost" }, () =>
+//change host to 0.0.0.0 when deploying, localhost for test
+app.listen({ port: process.env.EXPO_PUBLIC_PORT, host: "0.0.0.0" }, () =>
   console.log("Server running on port: " + process.env.EXPO_PUBLIC_PORT)
 );
