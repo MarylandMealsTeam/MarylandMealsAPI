@@ -1,4 +1,4 @@
-import Macro from "./Macro";
+import Macro from "./Macros";
 
 export default interface FoodLog {
   userId: Number;

@@ -1,17 +1,17 @@
 import express, { Request, Response, RequestHandler, NextFunction } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { User } from "../interfaces/User";
-import UserModel from "../models/UserModel";
+import { User } from "../../interfaces/User";
+import UserModel from "../../models/UserModel";
 import dotenv from 'dotenv';
 import { Buffer } from 'buffer';
 import {
   DetectFoodsRequest,
   MealRecommenderRequest,
-} from '../types';
+} from '../../types';
 
 dotenv.config();
 
-const router = express.Router();
+const app = express.Router();
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.userId) {
     next();
@@ -21,7 +21,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 //Comment out below for testing
-router.use(async (req, res, next) => {
+app.use(async (req, res, next) => {
   const userId = req.session.userId;
   const user = await UserModel.findById(userId);
   const t = user as User;
@@ -33,7 +33,7 @@ router.use(async (req, res, next) => {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const model = genAI.getGenerativeModel({ model: 'models/gemini-1.5-pro' });
 
-router.post("/detect-foods", requireAuth, async (req, res) => {
+app.post("/detect-foods", requireAuth, async (req, res) => {
   try{
     const { imageUrl, imageBase64, menu } = req.body as DetectFoodsRequest;
     if (!imageUrl && !imageBase64) {
@@ -79,7 +79,7 @@ router.post("/detect-foods", requireAuth, async (req, res) => {
 });
 
 
-router.post("/meal-recommender", requireAuth, async (req, res) => {
+app.post("/meal-recommender", requireAuth, async (req, res) => {
   try {
     const { context } = req.body as MealRecommenderRequest;
     if (!context) {
@@ -98,4 +98,4 @@ router.post("/meal-recommender", requireAuth, async (req, res) => {
   }
 });
 
-export default router;
+export default app;

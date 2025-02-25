@@ -2,9 +2,7 @@ import express from "express";
 import session from "express-session";
 import dotenv from "dotenv";
 import cors from "cors";
-import user from "./routes/user";
-import ai from "./routes/ai";
-import usersession from "./routes/session";
+import routes from "./routes";
 
 dotenv.config();
 
@@ -32,9 +30,7 @@ app.use(
   })
 );
 
-app.use("/user", user);
-app.use("/ai", ai);
-app.use("/session", usersession);
+app.use("/api", routes);
 
 //change host to 0.0.0.0 when deploying, localhost for test
 app.listen({ port: process.env.PORT, host: "0.0.0.0" }, () =>

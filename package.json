@@ -2,11 +2,11 @@
   "name": "marylandmealsai",
   "version": "1.0.0",
   "description": "marylandmealsai",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts"
+    "start": "node dist/app.js",
+    "dev": "ts-node src/app.ts"
   },
   "author": "",
   "license": "ISC",
