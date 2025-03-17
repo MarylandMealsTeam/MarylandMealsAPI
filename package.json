@@ -1,12 +1,11 @@
 {
-  "name": "marylandmealsai",
+  "name": "marylandmealsapi",
   "version": "1.0.0",
-  "description": "marylandmealsai",
+  "description": "marylandmealsapi",
   "main": "app.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/app.js",
-    "dev": "ts-node src/app.ts"
+    "start": "ts-node -r tsconfig-paths/register src/app.ts"
   },
   "author": "",
   "license": "ISC",
@@ -31,6 +30,7 @@
     "@types/express-session": "^1.18.1",
     "@types/node": "^22.13.4",
     "@types/puppeteer": "^7.0.4",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3"
   }
 }

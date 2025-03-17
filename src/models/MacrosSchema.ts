@@ -1,4 +1,4 @@
-import Macros from "../interfaces/Macros";
+import Macros from "@/interfaces/Macros";
 import { Schema } from "mongoose";
 
 export default new Schema<Macros>({

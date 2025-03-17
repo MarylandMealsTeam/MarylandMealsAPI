@@ -9,4 +9,6 @@ export interface User extends Document {
   currentWeight: number;
   goalWeight: number;
   goalMacros: Macros;
+  allergens: string[];
+  diningHallPreferences: string[];
 }

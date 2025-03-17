@@ -10,7 +10,7 @@ const app = express();
 
 app.use(
   session({
-    secret: process.env.EXPO_SECRET_KEY!,
+    secret: process.env.SECRET_KEY!,
     resave: false,
     saveUninitialized: false,
     name: process.env.COOKIE_NAME,
@@ -22,7 +22,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "*",
+    origin: "*", // process.env.BASE_URL
     allowedHeaders:
       "Origin, X-Requested-With, Content-Type, Accept, Authorization",
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
