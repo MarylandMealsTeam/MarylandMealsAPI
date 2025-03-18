@@ -33,6 +33,6 @@ app.use(
 app.use("/api", routes);
 
 //change host to 0.0.0.0 when deploying, localhost for test
-app.listen({ port: process.env.PORT, host: "0.0.0.0" }, () =>
-  console.log("Server running on port: " + process.env.PORT)
-);
+app.listen({ port: process.env.PORT, host: "0.0.0.0" }, () => {
+  console.log("Server running");
+});

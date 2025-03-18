@@ -17,15 +17,19 @@ dotenv.config();
 const authenticate = express.Router();
 
 authenticate.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new UserModel({
-    name,
-    email,
-    password: hashedPassword,
-  });
-  await user.save();
-  res.send({ message: "User registered!" });
+  try {
+    const { name, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new UserModel({
+      name,
+      email,
+      password: hashedPassword,
+    });
+    await user.save();
+    res.send({ message: "User registered!" });
+  } catch (error) {
+    res.status(401).send({ error: "Unable to register user" });
+  }
 });
 
 authenticate.post("/login", async (req, res) => {
@@ -38,10 +42,10 @@ authenticate.post("/login", async (req, res) => {
       req.session.userId = user.id;
       res.send({ message: "Successfully logged in!" });
     } else {
-      res.sendStatus(401);
+      res.status(401).send({ error: "Password incorrect" });
     }
   } catch (error) {
-    res.status(401).send(error);
+    res.status(401).send({ error: "Unable to login user" });
   }
 });
 

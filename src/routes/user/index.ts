@@ -6,24 +6,23 @@ import update from "./update";
 
 const user = express.Router();
 
-const requireAuth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.userId) {
     next();
   } else {
-    res.status(401).send({ message: "User not authenticated" });
+    res.status(401).send({ error: "User data not accessible" });
   }
 };
 
 user.use(async (req, res, next) => {
-  const userId = req.session.userId;
-  const user = await UserModel.findById(userId);
-  const t = user as User;
-  res.locals.user = user as User;
-  next();
+  try {
+    const userId = req.session.userId;
+    const user = await UserModel.findById(userId);
+    res.locals.user = user as User;
+    next();
+  } catch (error) {
+    res.status(401).send({ error: "User not authenticated" });
+  }
 });
 
 user.get("/", requireAuth, async (req, res) => {
@@ -37,7 +36,7 @@ user.post("/logout", requireAuth, async (req, res) => {
       res.status(401).send({ message: "error" });
     } else {
       res.clearCookie(process.env.COOKIE_NAME!);
-      res.send({ message: "logged out" });
+      res.send({ message: "Logged out successfully!" });
     }
   });
 });
