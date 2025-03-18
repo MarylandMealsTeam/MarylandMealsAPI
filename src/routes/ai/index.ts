@@ -32,7 +32,7 @@ app.use(async (req, res, next) => {
 });
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
 app.post("/detect-foods", requireAuth, async (req, res) => {
   try {
@@ -93,10 +93,61 @@ app.post("/meal-recommender", requireAuth, async (req, res) => {
       return;
     }
 
-    const prompt = `Based on the following information about a person, create a meal plan for them: ${context}`;
+    const response = await fetch("https://terpalert.xyz/api/v1/daily-items/?all=true&date=2025-03-01");
+    const data = await response.json();
+    const dailyMenuItems = data.results.map((item: { menu_item?: { name?: string, calories?: number, protein?: number, carbs?: number, fats?: number } }) => {
+      const { name, calories, protein, carbs, fats } = item.menu_item || {};
+      
+      // You can store the nutritional info as a string or as an object
+      if (name) {
+          return {
+              name,
+              calories,
+              protein,
+              carbs,
+              fats
+          };
+      }
+      return null; // Return null for items without a name
+  }).filter(Boolean);    // console.log(dailyMenuItems);
+
+    const formattedMenu = dailyMenuItems.map((item: { name: string; calories?: number; protein?: number; carbs?: number; fats?: number }) => 
+      `${item.name} (Calories: ${item.calories}, Protein: ${item.protein}g, Carbs: ${item.carbs}g, Fats: ${item.fats}g)`
+    ).join(", ");
+    console.log("Formatted Menu:", formattedMenu);
+
+    const prompt = `
+      You are a helpful AI assistant that creates personalized meal plans for students.
+      You will be provided with:
+
+      - Information about the student (dietary preferences, goals, restrictions, etc.)
+      - A list of available menu items for the day
+
+      Your task: Create a meal plan tailored to the student's information using ONLY the menu items provided.
+
+      Important Rules:
+      - Use only the provided menu items when the menu is given.
+      - Do NOT invent or suggest any items that are not listed in the menu.
+      - If the menu is empty or not provided, you may suggest reasonable meal items based on the student's information.
+
+      Student Information:
+      ${context}
+
+      Available Menu Items (select only from these):
+      ${formattedMenu}
+
+      Return the meal plan strictly in the following JSON format:
+      {
+        "breakfast": ["item1", "item2"],
+        "lunch": ["item3", "item4"],
+        "dinner": ["item5", "item6"],
+      }
+
+      Include ONLY menu item names in the arrays. Do not add descriptions or extra text.
+    `;
     const result = await model.generateContent(prompt);
 
-    res.json({ plan: result.response.text() });
+    res.json({ plan: result.response.text().replace(/```[a-zA-Z]*/g, "").replace(/```/g, "") });
   } catch (error) {
     console.error("Error processing the request:", error);
     res
