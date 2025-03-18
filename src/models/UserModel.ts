@@ -22,6 +22,11 @@ const UserSchema = new Schema<User>(
       type: String,
       required: true,
     },
+    dateOfBirth: {
+      type: Date,
+      default: Date.now,
+      required: true,
+    },
     foodLogIds: {
       type: [{ type: ObjectId, ref: "FoodLogModel" }],
       required: true,

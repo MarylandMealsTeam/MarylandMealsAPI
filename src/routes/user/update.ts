@@ -28,6 +28,16 @@ update.patch("/password", async (req, res) => {
   }
 });
 
+update.patch("/dateOfBirth", async (req, res) => {
+  const user: User = res.locals.user;
+  const { dateOfBirth } = req.body;
+
+  user.dateOfBirth = dateOfBirth;
+  user.save();
+
+  res.send({ message: "Success" });
+});
+
 update.patch("/weight", async (req, res) => {
   const user: User = res.locals.user;
   const { currentWeight, targetWeight } = req.body;
