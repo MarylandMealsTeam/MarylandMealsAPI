@@ -26,7 +26,6 @@ app.use(
     allowedHeaders:
       "Origin, X-Requested-With, Content-Type, Accept, Authorization",
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
-    credentials: true,
   })
 );
 
