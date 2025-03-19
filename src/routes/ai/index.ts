@@ -5,7 +5,7 @@ import express, {
   NextFunction,
 } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { User } from "@/interfaces/User";
+import User from "@/interfaces/User";
 import UserModel from "@/models/UserModel";
 import dotenv from "dotenv";
 import { Buffer } from "buffer";

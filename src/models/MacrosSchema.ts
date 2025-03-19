@@ -7,3 +7,4 @@ export default new Schema<Macros>({
   protein: Number,
   carbs: Number,
 });
+

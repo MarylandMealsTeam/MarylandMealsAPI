@@ -1,92 +1,65 @@
 import express, { Request, Response, NextFunction } from "express";
-import { User } from "@/interfaces/User";
+import User from "@/interfaces/User";
 import bcrypt from "bcryptjs";
 import { getFoodLog } from "./log";
 
 const update = express.Router();
 
-update.patch("/name", async (req, res) => {
+update.patch("/", async (req, res) => {
   const user: User = res.locals.user;
-  const { name } = req.body;
+  const staticFields = ["email", "password"];
+  const body = req.body;
 
-  user.name = name;
-  user.save();
+  try {
+    for (const key in body) {
+      const value = body[key];
 
-  res.send({ message: "Success" });
+      if (!staticFields.includes(key)) {
+        user.set(key, value);
+      }
+
+      if (key === "goalMacros") {
+        const log = await getFoodLog(user, new Date());
+        log.target = value;
+        log.save();
+      }
+    }
+
+    user.save();
+    res.send({ message: "Success" });
+  } catch (error) {
+    res.status(401).send(error);
+  }
 });
 
 update.patch("/password", async (req, res) => {
-  const user: User = res.locals.user;
-  const { oldPassword, newPassword } = req.body;
+  try {
+    const user: User = res.locals.user;
+    const { oldPassword, newPassword } = req.body;
 
-  if (bcrypt.compareSync(oldPassword, user.password)) {
-    user.password = await bcrypt.hash(newPassword, 10);
+    if (bcrypt.compareSync(oldPassword, user.password)) {
+      user.password = await bcrypt.hash(newPassword, 10);
+      user.save();
+      res.send({ message: "Success" });
+    } else {
+      res.status(401).send({ message: "Invalid old password!" });
+    }
+  } catch (error) {
+    res.status(401).send(error);
+  }
+});
+
+update.patch("/generate-goal-weight", async (req, res) => {
+  const user: User = res.locals.user;
+
+  try {
+    const newGoalWeight = user.goalWeight + 5;
+    user.goalWeight = newGoalWeight;
     user.save();
-    res.send({ message: "Success" });
-  } else {
-    res.status(401).send({ message: "Invalid old password!" });
+    res.send({ newGoalWeight });
+  } catch (error) {
+    res.status(401).send(error);
   }
-});
-
-update.patch("/dateOfBirth", async (req, res) => {
-  const user: User = res.locals.user;
-  const { dateOfBirth } = req.body;
-
-  user.dateOfBirth = dateOfBirth;
-  user.save();
-
-  res.send({ message: "Success" });
-});
-
-update.patch("/weight", async (req, res) => {
-  const user: User = res.locals.user;
-  const { currentWeight, targetWeight } = req.body;
-
-  if (currentWeight) {
-    user.currentWeight = currentWeight;
-  }
-
-  if (targetWeight) {
-    user.goalWeight = targetWeight;
-  }
-
-  user.save();
-
-  res.send({ message: "Success" });
-});
-
-update.patch("/macros", async (req, res) => {
-  const user: User = res.locals.user;
-  const { macros } = req.body;
-
-  user.goalMacros = macros;
-  user.save();
-
-  const log = await getFoodLog(user, new Date());
-  log.target = macros;
-  log.save();
-
-  res.send({ message: "Success" });
-});
-
-update.patch("/allergens", async (req, res) => {
-  const user: User = res.locals.user;
-  const { allergenNames } = req.body;
-
-  user.allergens = allergenNames;
-  user.save();
-
-  res.send({ message: "Success" });
-});
-
-update.patch("/diningHallPreferences", async (req, res) => {
-  const user: User = res.locals.user;
-  const { diningHallPreferences } = req.body;
-
-  user.diningHallPreferences = diningHallPreferences;
-  user.save();
-
-  res.send({ message: "Success" });
 });
 
 export default update;

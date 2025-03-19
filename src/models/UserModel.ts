@@ -1,14 +1,11 @@
-import { User } from "@/interfaces/User";
+import User from "@/interfaces/User";
 import { ObjectId } from "mongodb";
 import { Schema, model } from "mongoose";
 import MacrosSchema from "./MacrosSchema";
+import { emptyMacros } from "@/interfaces/Macros";
 
 const UserSchema = new Schema<User>(
   {
-    name: {
-      type: String,
-      required: true,
-    },
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -22,35 +19,56 @@ const UserSchema = new Schema<User>(
       type: String,
       required: true,
     },
+    name: {
+      type: String,
+      required: false,
+      default: "",
+    },
     dateOfBirth: {
       type: Date,
+      required: false,
       default: Date.now,
-      required: true,
+    },
+    height: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    sex: {
+      type: String,
+      required: false,
+      default: "male",
     },
     foodLogIds: {
       type: [{ type: ObjectId, ref: "FoodLogModel" }],
-      required: true,
+      required: false,
+      default: [],
     },
     currentWeight: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     goalWeight: {
       type: Number,
-      required: true,
+      required: false,
+      default: 0,
     },
     goalMacros: {
       type: MacrosSchema,
       required: false,
+      default: emptyMacros,
     },
     allergens: {
       type: [String],
       required: false,
+      default: [],
     },
     diningHallPreferences: {
       type: [String],
       required: false,
-    }
+      default: ["251 North", "Yahentamitsi", "South Campus"],
+    },
   },
   {
     timestamps: true,
