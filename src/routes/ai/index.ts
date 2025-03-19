@@ -10,6 +10,7 @@ import UserModel from "@/models/UserModel";
 import dotenv from "dotenv";
 import { Buffer } from "buffer";
 import { DetectFoodsRequest, MealRecommenderRequest } from "@/types";
+import { Meal } from "@/interfaces/Meal";
 
 dotenv.config();
 
@@ -95,55 +96,62 @@ app.post("/meal-recommender", requireAuth, async (req, res) => {
 
     const response = await fetch("https://terpalert.xyz/api/v1/daily-items/?all=true&date=2025-03-01");
     const data = await response.json();
-    const dailyMenuItems = data.results.map((item: { menu_item?: { name?: string, calories?: number, protein?: number, carbs?: number, fats?: number } }) => {
-      const { name, calories, protein, carbs, fats } = item.menu_item || {};
-      
-      // You can store the nutritional info as a string or as an object
-      if (name) {
-          return {
-              name,
-              calories,
-              protein,
-              carbs,
-              fats
-          };
-      }
-      return null; // Return null for items without a name
-  }).filter(Boolean);    // console.log(dailyMenuItems);
+    const dailyMenuItems: Meal[] = data.results.filter((item: Meal) => item.menu_item?.name);
 
-    const formattedMenu = dailyMenuItems.map((item: { name: string; calories?: number; protein?: number; carbs?: number; fats?: number }) => 
-      `${item.name} (Calories: ${item.calories}, Protein: ${item.protein}g, Carbs: ${item.carbs}g, Fats: ${item.fats}g)`
-    ).join(", ");
-    console.log("Formatted Menu:", formattedMenu);
+    const formattedMenu = dailyMenuItems.map((item) => 
+      JSON.stringify(item.menu_item)
+    ).join(",\n");
 
     const prompt = `
       You are a helpful AI assistant that creates personalized meal plans for students.
       You will be provided with:
 
       - Information about the student (dietary preferences, goals, restrictions, etc.)
-      - A list of available menu items for the day
+      - A list of available menu items for the day with full nutritional information and details
 
       Your task: Create a meal plan tailored to the student's information using ONLY the menu items provided.
 
       Important Rules:
       - Use only the provided menu items when the menu is given.
       - Do NOT invent or suggest any items that are not listed in the menu.
+      - Use additional information like ingredients, allergens, and serving size when making decisions.
       - If the menu is empty or not provided, you may suggest reasonable meal items based on the student's information.
 
       Student Information:
       ${context}
 
-      Available Menu Items (select only from these):
+      Available Menu Items:
+      [
       ${formattedMenu}
+      ]
 
-      Return the meal plan strictly in the following JSON format:
+      Return the meal plan strictly in the following JSON format with no additional text:
       {
-        "breakfast": ["item1", "item2"],
-        "lunch": ["item3", "item4"],
-        "dinner": ["item5", "item6"],
+        "breakfast": Meal[],
+        "lunch": Meal[],
+        "dinner": Meal[],
       }
 
-      Include ONLY menu item names in the arrays. Do not add descriptions or extra text.
+      Here is the Meal interface:
+      interface Meal {
+        id: number;
+        menu_item: {
+          id: number;
+          name: string;
+          ingredients: string;
+          image: any;
+          calories: number;
+          carbs: number;
+          protein: number;
+          fats: number;
+          allergens?: string[];
+          serving_size?: string;
+        };
+        date: string;
+        dh_y: boolean;
+        dh_south: boolean;
+        dh_251: boolean;
+      }
     `;
     const result = await model.generateContent(prompt);
 
