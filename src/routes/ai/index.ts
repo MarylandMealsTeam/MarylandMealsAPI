@@ -105,4 +105,39 @@ app.post("/meal-recommender", requireAuth, async (req, res) => {
   }
 });
 
+app.post("/suggest-macros", requireAuth, async (req, res) => {
+  try {
+    const { context } = req.body;
+    if (!context) {
+      res
+        .status(400)
+        .json({ error: "context is required in the request body" });
+      return;
+    }
+    const prompt = `
+      You are an expert nutiritionist. You are given a person's height, weight, and their goal weight.
+      Suggest a daily macro split for them that includes the number of calories, protein, carbs, and fats
+      they should eat. Protein, carbs, and fats should be in grams. 
+
+      Return the daily macro split strictly in the following JSON format with no additional text:
+      {
+        "calorie": number,
+        "protein": number,
+        "carbs": number,
+        "fats": number,
+      }
+
+      Here is the person's height, weight, and goal weight:
+      ${context}
+    `;
+    const result = await model.generateContent(prompt);
+    res.json({ macros: result.response.text() });
+  } catch (error) {
+    console.error("Error processing the request:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing the request" });
+  }
+});
+
 export default app;
