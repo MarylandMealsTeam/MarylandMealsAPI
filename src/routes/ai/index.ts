@@ -13,7 +13,7 @@ import { DetectFoodsRequest, MealRecommenderRequest } from "@/types";
 
 dotenv.config();
 
-const app = express.Router();
+const ai = express.Router();
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.userId) {
     next();
@@ -23,7 +23,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 //Comment out below for testing
-app.use(async (req, res, next) => {
+ai.use(async (req, res, next) => {
   const userId = req.session.userId;
   const user = await UserModel.findById(userId);
   const t = user as User;
@@ -34,7 +34,7 @@ app.use(async (req, res, next) => {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-pro" });
 
-app.post("/detect-foods", requireAuth, async (req, res) => {
+ai.post("/detect-foods", requireAuth, async (req, res) => {
   try {
     const { imageUrl, imageBase64, menu } = req.body as DetectFoodsRequest;
     if (!imageUrl && !imageBase64) {
@@ -83,15 +83,23 @@ app.post("/detect-foods", requireAuth, async (req, res) => {
   }
 });
 
-app.post("/meal-recommender", requireAuth, async (req, res) => {
+ai.post("/meal-recommender", requireAuth, async (req, res) => {
   try {
-    const { context } = req.body as MealRecommenderRequest;
-    if (!context) {
-      res
-        .status(400)
-        .json({ error: "context is required in the request body" });
-      return;
-    }
+    const user = res.locals.user as User;
+    const context =
+      "Current Weight: " +
+      user.currentWeight +
+      "\nGoal Weight: " +
+      user.goalWeight +
+      "\nCalorie Goal: " +
+      user.goalMacros.calories +
+      " calories\nProtein Goal: " +
+      user.goalMacros.protein +
+      " grams \nCarb Goal: " +
+      user.goalMacros.carbs +
+      " grams \nFat Goal: " +
+      user.goalMacros.fats +
+      " grams";
 
     const prompt = `Based on the following information about a person, create a meal plan for them: ${context}`;
     const result = await model.generateContent(prompt);
@@ -105,4 +113,4 @@ app.post("/meal-recommender", requireAuth, async (req, res) => {
   }
 });
 
-export default app;
+export default ai;
