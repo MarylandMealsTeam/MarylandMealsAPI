@@ -102,13 +102,17 @@ ai.post("/meal-recommender", requireAuth, async (req, res) => {
       user.goalMacros.fats +
       " grams";
 
-    const response = await fetch("https://terpalert.xyz/api/v1/daily-items/?all=true&date=2025-03-01");
+    const response = await fetch(
+      "https://terpalert.xyz/api/v1/daily-items/?all=true&date=2025-01-28"
+    );
     const data = await response.json();
-    const dailyMenuItems: Meal[] = data.results.filter((item: Meal) => item.menu_item?.name);
+    const dailyMenuItems: Meal[] = data.results.filter(
+      (item: Meal) => item.menu_item?.name
+    );
 
-    const formattedMenu = dailyMenuItems.map((item) => 
-      JSON.stringify(item.menu_item)
-    ).join(",\n");
+    const formattedMenu = dailyMenuItems
+      .map((item) => JSON.stringify(item.menu_item))
+      .join(",\n");
 
     const prompt = `
       You are a helpful AI assistant that creates personalized meal plans for students.
@@ -163,7 +167,12 @@ ai.post("/meal-recommender", requireAuth, async (req, res) => {
     `;
     const result = await model.generateContent(prompt);
 
-    res.json({ plan: result.response.text().replace(/```[a-zA-Z]*/g, "").replace(/```/g, "") });
+    res.json({
+      plan: result.response
+        .text()
+        .replace(/```[a-zA-Z]*/g, "")
+        .replace(/```/g, ""),
+    });
   } catch (error) {
     console.error("Error processing the request:", error);
     res
@@ -174,15 +183,11 @@ ai.post("/meal-recommender", requireAuth, async (req, res) => {
 
 ai.post("/suggest-macros", requireAuth, async (req, res) => {
   try {
-    const { context } = req.body;
-    if (!context) {
-      res
-        .status(400)
-        .json({ error: "context is required in the request body" });
-      return;
-    }
+    const user = res.locals.user as User;
+    const context = `Height: ${user.height} inches, Current Weight: ${user.currentWeight}, Goal Weight: ${user.goalWeight}`;
+
     const prompt = `
-      You are an expert nutiritionist. You are given a person's height, weight, and their goal weight.
+      You are an expert nutritionist. You are given a person's height, weight, and their goal weight.
       Suggest a daily macro split for them that includes the number of calories, protein, carbs, and fats
       they should eat. Protein, carbs, and fats should be in grams. 
 
@@ -198,8 +203,18 @@ ai.post("/suggest-macros", requireAuth, async (req, res) => {
       ${context}
     `;
     const result = await model.generateContent(prompt);
-    console.log(result.response.text().replace(/```[a-zA-Z]*/g, "").replace(/```/g, ""));
-    res.json({ macros: result.response.text().replace(/```[a-zA-Z]*/g, "").replace(/```/g, "") });
+    console.log(
+      result.response
+        .text()
+        .replace(/```[a-zA-Z]*/g, "")
+        .replace(/```/g, "")
+    );
+    res.json({
+      macros: result.response
+        .text()
+        .replace(/```[a-zA-Z]*/g, "")
+        .replace(/```/g, ""),
+    });
   } catch (error) {
     console.error("Error processing the request:", error);
     res
