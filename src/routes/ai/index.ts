@@ -5,7 +5,7 @@ import express, {
   NextFunction,
 } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { User } from "@/interfaces/User";
+import User from "@/interfaces/User";
 import UserModel from "@/models/UserModel";
 import dotenv from "dotenv";
 import { Buffer } from "buffer";
@@ -14,7 +14,7 @@ import { Meal } from "@/interfaces/Meal";
 
 dotenv.config();
 
-const app = express.Router();
+const ai = express.Router();
 const requireAuth = (req: Request, res: Response, next: NextFunction) => {
   if (req.session.userId) {
     next();
@@ -24,7 +24,7 @@ const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 };
 
 //Comment out below for testing
-app.use(async (req, res, next) => {
+ai.use(async (req, res, next) => {
   const userId = req.session.userId;
   const user = await UserModel.findById(userId);
   const t = user as User;
@@ -35,7 +35,7 @@ app.use(async (req, res, next) => {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-app.post("/detect-foods", requireAuth, async (req, res) => {
+ai.post("/detect-foods", requireAuth, async (req, res) => {
   try {
     const { imageUrl, imageBase64, menu } = req.body as DetectFoodsRequest;
     if (!imageUrl && !imageBase64) {
@@ -84,15 +84,23 @@ app.post("/detect-foods", requireAuth, async (req, res) => {
   }
 });
 
-app.post("/meal-recommender", requireAuth, async (req, res) => {
+ai.post("/meal-recommender", requireAuth, async (req, res) => {
   try {
-    const { context } = req.body as MealRecommenderRequest;
-    if (!context) {
-      res
-        .status(400)
-        .json({ error: "context is required in the request body" });
-      return;
-    }
+    const user = res.locals.user as User;
+    const context =
+      "Current Weight: " +
+      user.currentWeight +
+      "\nGoal Weight: " +
+      user.goalWeight +
+      "\nCalorie Goal: " +
+      user.goalMacros.calories +
+      " calories\nProtein Goal: " +
+      user.goalMacros.protein +
+      " grams \nCarb Goal: " +
+      user.goalMacros.carbs +
+      " grams \nFat Goal: " +
+      user.goalMacros.fats +
+      " grams";
 
     const response = await fetch("https://terpalert.xyz/api/v1/daily-items/?all=true&date=2025-03-01");
     const data = await response.json();
@@ -200,4 +208,4 @@ app.post("/suggest-macros", requireAuth, async (req, res) => {
   }
 });
 
-export default app;
+export default ai;

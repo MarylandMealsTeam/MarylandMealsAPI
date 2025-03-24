@@ -1,7 +1,7 @@
 
 import FoodLogModel from "@/models/FoodLogModel";
 import express from "express";
-import { User } from "@/interfaces/User";
+import User from "@/interfaces/User";
 
 const log = express.Router();
 

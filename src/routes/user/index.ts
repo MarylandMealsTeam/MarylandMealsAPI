@@ -1,6 +1,6 @@
 import UserModel from "@/models/UserModel";
 import express, { Request, Response, NextFunction } from "express";
-import { User } from "@/interfaces/User";
+import User from "@/interfaces/User";
 import log from "./log";
 import update from "./update";
 

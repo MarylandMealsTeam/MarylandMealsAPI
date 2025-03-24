@@ -22,7 +22,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "*", // process.env.BASE_URL
+    origin: process.env.NODE_ENV === "development" ? process.env.EXPO_URL : "*",
     allowedHeaders:
       "Origin, X-Requested-With, Content-Type, Accept, Authorization",
     methods: ["POST", "PUT", "GET", "OPTIONS", "HEAD"],
@@ -34,5 +34,5 @@ app.use("/api", routes);
 
 //change host to 0.0.0.0 when deploying, localhost for test
 app.listen({ port: process.env.PORT, host: "0.0.0.0" }, () => {
-  console.log("Server running");
+  console.log("Server running, with environment=" + process.env.NODE_ENV);
 });
