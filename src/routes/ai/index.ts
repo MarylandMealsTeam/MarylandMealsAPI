@@ -10,7 +10,7 @@ import UserModel from "@/models/UserModel";
 import dotenv from "dotenv";
 import { Buffer } from "buffer";
 import { DetectFoodsRequest, MealRecommenderRequest } from "@/types";
-import { Meal } from "@/interfaces/Meal";
+import Meal from "@/interfaces/Meal";
 
 dotenv.config();
 
@@ -172,7 +172,7 @@ ai.post("/meal-recommender", requireAuth, async (req, res) => {
   }
 });
 
-app.post("/suggest-macros", requireAuth, async (req, res) => {
+ai.post("/suggest-macros", requireAuth, async (req, res) => {
   try {
     const { context } = req.body;
     if (!context) {
