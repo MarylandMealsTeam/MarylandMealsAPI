@@ -1,23 +1,20 @@
 import express from "express";
-import session from "express-session";
 import dotenv from "dotenv";
 import cors from "cors";
 import routes from "./routes";
+import cookieSession from "cookie-session";
 
 dotenv.config();
 
 const app = express();
 
 app.use(
-  session({
+  cookieSession({
     secret: process.env.SECRET_KEY!,
-    resave: false,
-    saveUninitialized: false,
     name: process.env.COOKIE_NAME,
-    cookie: { secure: process.env.NODE_ENV === "production" },
+    secure: process.env.NODE_ENV === "production",
   })
 );
-
 app.use(express.json());
 
 app.use(
