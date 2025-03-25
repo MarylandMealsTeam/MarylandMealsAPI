@@ -103,7 +103,7 @@ ai.post("/meal-recommender", requireAuth, async (req, res) => {
       " grams";
 
     const response = await fetch(
-      "https://terpalert.xyz/api/v1/daily-items/?all=true&date=2025-01-28"
+      "https://terpalert.xyz/api/v1/daily-items/?all=true"
     );
     const data = await response.json();
     const dailyMenuItems: Meal[] = data.results.filter(
